@@ -16,6 +16,7 @@ create table public.perfil_acesso_permissoes (
   )),
   pode_ver boolean not null default false,
   pode_lancar boolean not null default false,
+  created_at timestamptz not null default now(),
   unique (perfil_acesso_id, modulo)
 );
 
