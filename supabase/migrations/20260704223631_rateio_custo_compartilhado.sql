@@ -16,6 +16,7 @@ create table public.rateio_custo_compartilhado_itens (
   destino_tipo text not null check (destino_tipo in ('unidade_negocio', 'familiar_consolidado')),
   unidade_negocio_id uuid references public.unidades_negocio(id) on delete restrict,
   valor numeric(12,2) not null check (valor > 0),
+  created_at timestamptz not null default now(),
   constraint rateio_destino_consistente_check check (
     (destino_tipo = 'unidade_negocio' and unidade_negocio_id is not null)
     or
@@ -26,6 +27,8 @@ create table public.rateio_custo_compartilhado_itens (
 alter table public.rateio_custo_compartilhado_itens enable row level security;
 
 create index rateio_itens_lancamento_id_idx on public.rateio_custo_compartilhado_itens(lancamento_custo_compartilhado_id);
+
+create index lancamentos_custo_compartilhado_propriedade_id_idx on public.lancamentos_custo_compartilhado(propriedade_id);
 
 create or replace function public.valida_soma_rateio()
 returns trigger
