@@ -1,0 +1,138 @@
+# Especificação — Ferramenta de Extração de Conversas do WhatsApp
+
+> Este documento é a especificação para o Claude Code construir a ferramenta.
+> Não é um projeto específico de um cliente — é uma **ferramenta de uso geral**,
+> reutilizável em qualquer projeto futuro.
+
+---
+
+## 1. Objetivo
+
+Uma ferramenta de linha de comando que recebe a exportação de uma conversa do
+WhatsApp (texto + mídia: imagens, áudios, documentos) e gera **um único
+arquivo Markdown consolidado**, com todo o conteúdo extraído, transcrito e
+organizado cronologicamente — pronto para ser usado como contexto em qualquer
+tipo de projeto.
+
+**Não é específica de nenhum domínio de negócio.** Deve funcionar igualmente
+bem para: entender uma conversa com um cliente potencial, mapear requisitos
+levantados informalmente, documentar uma conversa operacional, ou qualquer
+outro uso onde uma conversa do WhatsApp precise virar contexto legível e
+reaproveitável.
+
+---
+
+## 2. Casos de uso previstos
+
+- Iniciar conversa com um cliente potencial sobre uma nova solução → rodar a
+  ferramenta na conversa → obter um markdown com o que já foi discutido, para
+  não perder contexto entre sessões
+- Mapear uma conversa operacional existente (ex: um contato que reporta dados
+  por WhatsApp) → gerar contexto estruturado sem reler tudo manualmente
+- Qualquer situação em que uma conversa do WhatsApp precise ser transformada
+  em documento de referência
+
+A ferramenta deve morar numa pasta própria de ferramentas reutilizáveis (não
+dentro da pasta de um projeto específico), por exemplo:
+`D:\FERRAMENTAS\extrator_whatsapp\`
+
+---
+
+## 3. Entrada
+
+- Pasta contendo a exportação do WhatsApp **com mídia** (o `.zip` exportado,
+  já extraído):
+  - Um arquivo `.txt` com o texto da conversa
+  - Arquivos de áudio (`.opus`)
+  - Imagens (`.jpg`, `.png`)
+  - Documentos (`.pdf` e eventualmente outros formatos)
+
+A ferramenta deve receber essa pasta como parâmetro de linha de comando —
+nunca deve ter caminhos fixos ou específicos de um projeto no código.
+
+---
+
+## 4. Processamento necessário
+
+1. **Parsing do `.txt`** — extrair remetente, data/hora e conteúdo (ou
+   referência de mídia) de cada mensagem, na ordem cronológica original
+2. **Transcrição de áudio** — usar a API do Groq (Whisper Large v3 Turbo,
+   nível gratuito). Modelo de referência já testado neste projeto:
+   `whisper-large-v3-turbo`, `language="pt"`
+3. **Leitura de imagens** — usar a API do Claude (visão nativa) para descrever
+   o conteúdo da imagem; se a imagem for um documento fotografado (print,
+   cupom, captura de tela), extrair o texto/dados relevantes
+4. **Leitura de documentos PDF** — extrair o texto do PDF
+5. **Consolidação cronológica** — juntar tudo (texto original + transcrições +
+   descrições de imagem + conteúdo de PDF) respeitando a ordem real da
+   conversa
+
+---
+
+## 5. Saída
+
+Um único arquivo Markdown, nomeado de forma identificável, por exemplo:
+`CONTEXTO_{nome_do_contato}_{data_geracao}.md`
+
+Estrutura sugerida:
+
+```markdown
+# Contexto extraído — Conversa com {nome do contato}
+
+**Período coberto:** {data inicial} a {data final}
+**Gerado em:** {data de execução da ferramenta}
+**Total de mensagens:** {N} | **Áudios transcritos:** {N} | **Imagens processadas:** {N} | **Documentos lidos:** {N}
+
+## Resumo executivo
+{Resumo de 3-5 parágrafos gerado por IA, cobrindo os principais temas discutidos}
+
+## Linha do tempo consolidada
+{data/hora} — {remetente}: {conteúdo original, ou [ÁUDIO TRANSCRITO]: texto, ou [IMAGEM]: descrição, ou [DOCUMENTO]: conteúdo extraído}
+...
+```
+
+O resumo executivo deve ser gerado por IA (Claude) a partir da linha do tempo
+consolidada, mas **sem inventar informação** — apenas sintetizar o que
+realmente está na conversa.
+
+---
+
+## 6. Requisitos técnicos
+
+- **CLI** com parâmetros: pasta de entrada (obrigatório), pasta de saída
+  (opcional, padrão = mesma pasta de entrada)
+- **Chaves de API via `.env`** — nunca hardcoded no código:
+  - `GROQ_API_KEY` (transcrição de áudio)
+  - `ANTHROPIC_API_KEY` (leitura de imagem, geração do resumo executivo)
+- **Modular** — cada tipo de mídia (áudio, imagem, PDF) processado por uma
+  função/módulo separado, fácil de estender ou substituir no futuro
+- **Retomável** — se o processamento cair no meio (rede, limite de API),
+  deve ser possível rodar de novo sem reprocessar o que já foi feito
+  (salvar progresso incrementalmente, como já foi feito no protótipo anterior
+  deste projeto — ver `transcrever_audios.py` como referência de padrão)
+- **Sem dependência de domínio de negócio** — nenhuma lógica específica de
+  "propriedade rural", "cliente X" ou qualquer projeto particular deve entrar
+  no código da ferramenta em si
+- **Tratamento de erro por item** — se um áudio ou imagem falhar ao
+  processar, registrar o erro naquele item específico e continuar o
+  processamento dos demais, em vez de interromper tudo
+
+---
+
+## 7. Fora de escopo (por enquanto)
+
+- Captura em tempo real / automação contínua (isso é responsabilidade de
+  outra ferramenta, específica de cada projeto que precisar disso)
+- Classificação ou extração de eventos estruturados específicos de negócio
+  (ex: "eventos de produção rural") — essa camada fica em cada projeto que
+  consumir o markdown gerado por esta ferramenta, não na ferramenta em si
+- Interface gráfica — CLI é suficiente
+
+---
+
+## 8. Reaproveitamento
+
+Este é o requisito central: a ferramenta deve ser genérica o bastante para
+ser apontada para qualquer pasta de exportação do WhatsApp, de qualquer
+contato, em qualquer projeto futuro, sem precisar editar o código a cada uso
+— apenas trocar o parâmetro da pasta de entrada.

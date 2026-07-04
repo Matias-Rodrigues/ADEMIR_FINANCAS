@@ -1,0 +1,10 @@
+.env
+~$*.docx
+~$*.xlsx
+node_modules/
+.worktrees/
+worktrees/
+
+# Supabase local dev
+supabase/.branches/
+supabase/.temp/
