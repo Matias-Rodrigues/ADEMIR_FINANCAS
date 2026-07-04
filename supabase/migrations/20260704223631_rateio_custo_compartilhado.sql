@@ -75,6 +75,7 @@ create policy "ver itens de rateio da propria propriedade"
     select 1 from public.lancamentos_custo_compartilhado lcc
     where lcc.id = lancamento_custo_compartilhado_id
       and lcc.propriedade_id = public.usuario_propriedade_id()
+      and public.tem_permissao('financeiro_negocio', 'ver')
   ));
 
 create policy "lancar itens de rateio da propria propriedade"

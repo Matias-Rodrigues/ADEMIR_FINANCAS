@@ -42,6 +42,7 @@ create policy "ver parcelas de credito"
     select 1 from public.obrigacoes_credito oc
     where oc.id = obrigacao_credito_id
       and oc.propriedade_id = public.usuario_propriedade_id()
+      and public.tem_permissao('credito_obrigacoes', 'ver')
   ));
 
 create policy "lancar parcelas de credito"
