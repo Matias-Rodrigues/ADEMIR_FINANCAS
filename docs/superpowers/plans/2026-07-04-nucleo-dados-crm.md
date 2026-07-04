@@ -1037,7 +1037,7 @@ git commit -m "feat: cria rateio de custo compartilhado com trigger de validacao
 
 **Interfaces:**
 - Consumes: `unidades_negocio(id)` (Task 4), `usuarios(id)` (Task 3).
-- Produces: `obrigacoes_credito(id, propriedade_id, instituicao, tipo, unidade_negocio_id, valor_total, data_contratacao, created_at)`, `parcelas_credito(id, obrigacao_credito_id, numero_parcela, valor, data_vencimento, status, data_pagamento)`.
+- Produces: `obrigacoes_credito(id, propriedade_id, instituicao, tipo, unidade_negocio_id, valor_total, data_contratacao, created_at)`, `parcelas_credito(id, obrigacao_credito_id, numero_parcela, valor, data_vencimento, status, data_pagamento, created_at)`.
 
 - [ ] **Step 1: Escrever o teste (falhando)**
 
@@ -1119,6 +1119,7 @@ create table public.parcelas_credito (
   data_vencimento date not null,
   status text not null default 'pendente' check (status in ('pendente', 'pago', 'atrasado')),
   data_pagamento date,
+  created_at timestamptz not null default now(),
   unique (obrigacao_credito_id, numero_parcela)
 );
 
