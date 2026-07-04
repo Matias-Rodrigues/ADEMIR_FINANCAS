@@ -18,6 +18,7 @@
 - Decisão registrada nesta sessão: a fatia "pessoal" de um rateio de custo compartilhado (seção 5 do `PLANO_EXECUCAO_CRM.md`) vira uma **despesa familiar consolidada** — não vinculada a um CPF específico. Por isso `lancamentos_financeiros_familiares` tem a coluna `eh_consolidado_familiar`.
 - Fora de escopo deste plano (feature de negócio, não de schema): sincronizar automaticamente os itens de rateio com `lancamentos_financeiros_negocio`/`familiares`. Isso é lógica de aplicação, entra num plano futuro (roteiro item 6).
 - Testes em pgTAP, executados com `supabase test db`. Todo teste roda dentro de `begin; ... rollback;` (nunca persiste dado de teste).
+- **Correção aplicada durante a execução (após a Task 4):** RLS e GRANT são camadas independentes no Postgres — uma policy RLS correta não basta, o role `authenticated` também precisa de privilégio de tabela. A migration `supabase/migrations/<timestamp>_grants_default_privileges.sql` (`alter default privileges in schema public grant select, insert, update, delete on tables to authenticated;`) foi adicionada logo após a Task 4 e cobre automaticamente toda tabela criada a partir da Task 5 em diante — nenhuma task seguinte precisa incluir `grant` manual nas suas migrations.
 
 ---
 
