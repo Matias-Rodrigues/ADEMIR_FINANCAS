@@ -33,6 +33,8 @@ create index lancamentos_custo_compartilhado_propriedade_id_idx on public.lancam
 create or replace function public.valida_soma_rateio()
 returns trigger
 language plpgsql
+security definer
+set search_path = public
 as $$
 declare
   v_valor_total numeric(12,2);
