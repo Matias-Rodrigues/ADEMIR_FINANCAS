@@ -11,7 +11,9 @@ export async function GET() {
     // retorna AuthSessionMissingError localmente sem tocar a rede - nao serve como teste
     // de conectividade. Por isso batemos direto no endpoint de health do GoTrue, que
     // sempre faz uma chamada HTTP real e nao depende de nenhuma tabela protegida por RLS.
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/health`)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/health`, {
+      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
+    })
     if (!res.ok) {
       return NextResponse.json({ ok: false, error: `Supabase Auth respondeu ${res.status}` })
     }
