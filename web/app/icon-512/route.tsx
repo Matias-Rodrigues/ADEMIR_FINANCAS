@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { BRAND_COLOR } from '@/lib/brand'
 
 export async function GET() {
   return new ImageResponse(
@@ -10,7 +11,7 @@ export async function GET() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#16a34a',
+          background: BRAND_COLOR,
           color: 'white',
           fontSize: 260,
           fontWeight: 700,
