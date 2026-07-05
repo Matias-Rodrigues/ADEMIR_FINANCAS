@@ -6,6 +6,9 @@ select plan(2);
 -- demais arquivos de teste (bypass de RLS via role padrao do runner).
 insert into public.propriedades (id, nome) values ('11111111-1111-1111-1111-111111111111', 'Propriedade Teste');
 
+insert into public.propriedade_modulos_contratados (propriedade_id, modulo, ativo)
+values ('11111111-1111-1111-1111-111111111111', 'credito_obrigacoes', true);
+
 insert into auth.users (id, email) values
   ('33333333-3333-3333-3333-333333333333', 'ademir@teste.com'),
   ('44444444-4444-4444-4444-444444444444', 'membro@teste.com'),

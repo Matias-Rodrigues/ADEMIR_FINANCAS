@@ -2,6 +2,8 @@ begin;
 select plan(4);
 
 insert into public.propriedades (id, nome) values ('11111111-1111-1111-1111-111111111111', 'Propriedade Ademir');
+insert into public.propriedade_modulos_contratados (propriedade_id, modulo, ativo)
+values ('11111111-1111-1111-1111-111111111111', 'financeiro_negocio', true);
 insert into auth.users (id, email) values ('33333333-3333-3333-3333-333333333333', 'ademir@teste.com');
 insert into public.usuarios (id, propriedade_id, papel)
   values ('33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111', 'admin');
