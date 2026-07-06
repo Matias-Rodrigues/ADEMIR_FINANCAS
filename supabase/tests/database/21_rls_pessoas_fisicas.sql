@@ -1,5 +1,5 @@
 begin;
-select plan(6);
+select plan(8);
 
 insert into public.propriedades (id, nome) values
   ('11111111-1111-1111-1111-111111111111', 'Propriedade Ademir'),
@@ -58,6 +58,30 @@ select throws_ok(
   'new row violates row-level security policy for table "pessoas_fisicas"',
   'admin nao deve conseguir inserir pessoa fisica em outra propriedade'
 );
+
+update public.pessoas_fisicas set nome = 'Hackeado' where propriedade_id = '77777777-7777-7777-7777-777777777777';
+
+reset role;
+
+select is(
+  (select nome from public.pessoas_fisicas where propriedade_id = '77777777-7777-7777-7777-777777777777'),
+  'Cliente B',
+  'admin nao deve conseguir atualizar pessoa fisica de outra propriedade'
+);
+
+set local role authenticated;
+
+delete from public.pessoas_fisicas where propriedade_id = '77777777-7777-7777-7777-777777777777';
+
+reset role;
+
+select is(
+  (select count(*)::int from public.pessoas_fisicas where propriedade_id = '77777777-7777-7777-7777-777777777777'),
+  1,
+  'admin nao deve conseguir excluir pessoa fisica de outra propriedade'
+);
+
+set local role authenticated;
 
 -- dev: INSERT liberado em qualquer propriedade
 select set_config('request.jwt.claims', json_build_object('sub', '88888888-8888-8888-8888-888888888888')::text, true);
