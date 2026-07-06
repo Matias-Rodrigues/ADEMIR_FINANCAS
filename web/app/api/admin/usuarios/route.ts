@@ -40,7 +40,12 @@ export async function POST(request: Request) {
     )
   }
 
-  let pessoaFisicaId: string
+  // Nesta etapa apenas validamos — nenhuma linha é criada ainda. Isso garante
+  // que, se a criação do login falhar mais adiante (ex: e-mail duplicado),
+  // nada fica órfão no banco.
+  let pessoaFisicaId: string | null = null
+  let nomeNovo = ''
+  let cpfNovo = ''
 
   if (modo === 'existente') {
     const pessoaFisicaIdForm = String(formData.get('pessoa_fisica_id') ?? '')
@@ -59,8 +64,8 @@ export async function POST(request: Request) {
     }
     pessoaFisicaId = pessoa.id
   } else {
-    const nomeNovo = String(formData.get('nome_novo') ?? '').trim()
-    const cpfNovo = String(formData.get('cpf_novo') ?? '').trim()
+    nomeNovo = String(formData.get('nome_novo') ?? '').trim()
+    cpfNovo = String(formData.get('cpf_novo') ?? '').trim()
 
     if (!nomeNovo || !cpfNovo) {
       return NextResponse.redirect(
@@ -68,22 +73,10 @@ export async function POST(request: Request) {
         { status: 303 }
       )
     }
-
-    const { data: pessoaNova, error: erroPessoa } = await supabase
-      .from('pessoas_fisicas')
-      .insert({ propriedade_id: usuarioAtual.propriedade_id, nome: nomeNovo, cpf: cpfNovo })
-      .select('id')
-      .single()
-
-    if (erroPessoa || !pessoaNova) {
-      return NextResponse.redirect(
-        new URL('/dashboard/usuarios/novo?error=cpf_duplicado', request.url),
-        { status: 303 }
-      )
-    }
-    pessoaFisicaId = pessoaNova.id
   }
 
+  // Só depois de toda a validação criamos o login. Se isto falhar (ex: e-mail
+  // já em uso), nada mais foi criado até aqui, então não sobra órfão.
   const serviceClient = createServiceRoleClient()
   const { data: authData, error: erroAuth } = await serviceClient.auth.admin.createUser({
     email,
@@ -98,6 +91,26 @@ export async function POST(request: Request) {
     )
   }
 
+  // Login criado. Se o modo for "novo", criamos a pessoa física agora — se
+  // falhar (ex: CPF duplicado), desfazemos o login recém-criado para não
+  // deixar um usuário Auth órfão sem pessoa/registro em `usuarios`.
+  if (modo === 'novo') {
+    const { data: pessoaNova, error: erroPessoa } = await supabase
+      .from('pessoas_fisicas')
+      .insert({ propriedade_id: usuarioAtual.propriedade_id, nome: nomeNovo, cpf: cpfNovo })
+      .select('id')
+      .single()
+
+    if (erroPessoa || !pessoaNova) {
+      await serviceClient.auth.admin.deleteUser(authData.user.id)
+      return NextResponse.redirect(
+        new URL('/dashboard/usuarios/novo?error=cpf_duplicado', request.url),
+        { status: 303 }
+      )
+    }
+    pessoaFisicaId = pessoaNova.id
+  }
+
   const { error: erroUsuario } = await serviceClient.from('usuarios').insert({
     id: authData.user.id,
     propriedade_id: usuarioAtual.propriedade_id,
@@ -108,6 +121,10 @@ export async function POST(request: Request) {
   })
 
   if (erroUsuario) {
+    await serviceClient.auth.admin.deleteUser(authData.user.id)
+    if (modo === 'novo' && pessoaFisicaId) {
+      await supabase.from('pessoas_fisicas').delete().eq('id', pessoaFisicaId)
+    }
     return NextResponse.redirect(
       new URL('/dashboard/usuarios/novo?error=erro_inesperado', request.url),
       { status: 303 }
