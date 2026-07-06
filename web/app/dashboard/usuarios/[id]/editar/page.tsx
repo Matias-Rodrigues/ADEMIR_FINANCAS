@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/auth/current-usuario'
 import { mensagemErro } from '@/lib/erros-formulario'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { notFound } from 'next/navigation'
@@ -65,6 +66,27 @@ export default async function EditarUsuarioPage({
               ))}
             </Select>
             <Button type="submit">Salvar perfil</Button>
+          </form>
+
+          <form
+            method="POST"
+            action={`/api/admin/usuarios/${usuario.id}/resetar-senha`}
+            className="flex flex-col gap-2"
+          >
+            <Label htmlFor="password">Nova senha</Label>
+            <Input id="password" name="password" type="password" minLength={6} required />
+            <Button type="submit" variant="outline">
+              Resetar senha
+            </Button>
+          </form>
+
+          <form
+            method="POST"
+            action={`/api/admin/usuarios/${usuario.id}/${usuario.ativo ? 'desativar' : 'reativar'}`}
+          >
+            <Button type="submit" variant={usuario.ativo ? 'destructive' : 'default'}>
+              {usuario.ativo ? 'Desativar usuário' : 'Reativar usuário'}
+            </Button>
           </form>
         </CardContent>
       </Card>
