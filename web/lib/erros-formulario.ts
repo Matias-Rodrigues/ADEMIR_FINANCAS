@@ -1,0 +1,20 @@
+const MENSAGENS: Record<string, string> = {
+  credenciais_invalidas: 'E-mail ou senha inválidos.',
+  nome_obrigatorio: 'Informe um nome.',
+  dados_invalidos: 'Preencha todos os campos obrigatórios.',
+  pessoa_invalida: 'Selecione uma pessoa válida.',
+  perfil_invalido: 'Selecione um perfil de acesso válido.',
+  senha_curta: 'A senha precisa ter pelo menos 6 caracteres.',
+  email_duplicado: 'Já existe um usuário com este e-mail.',
+  cpf_duplicado: 'Já existe uma pessoa cadastrada com este CPF.',
+  nao_autorizado: 'Você não tem permissão para esta ação.',
+  usuario_nao_encontrado: 'Usuário não encontrado.',
+  erro_inesperado: 'Algo deu errado. Tente novamente.',
+}
+
+export function mensagemErro(codigo: string | undefined): string | null {
+  if (!codigo) {
+    return null
+  }
+  return MENSAGENS[codigo] ?? MENSAGENS.erro_inesperado
+}
