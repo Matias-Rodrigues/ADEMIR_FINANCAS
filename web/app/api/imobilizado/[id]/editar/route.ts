@@ -1,0 +1,102 @@
+import { createClient } from '@/lib/supabase/server'
+import { getUsuarioAtual } from '@/lib/auth/current-usuario'
+import { temPermissao } from '@/lib/auth/tem-permissao'
+import { NextResponse } from 'next/server'
+
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const usuarioAtual = await getUsuarioAtual()
+  if (!usuarioAtual) {
+    return NextResponse.redirect(new URL('/login', request.url), { status: 303 })
+  }
+
+  const podeLancar = await temPermissao('imobilizado', 'lancar')
+  if (!podeLancar) {
+    return NextResponse.redirect(new URL('/dashboard?error=nao_autorizado', request.url), {
+      status: 303,
+    })
+  }
+
+  const formData = await request.formData()
+  const categoria = String(formData.get('categoria') ?? '')
+  const nome = String(formData.get('nome') ?? '').trim()
+  const valorAquisicao = Number(formData.get('valor_aquisicao'))
+  const valorResidual = Number(formData.get('valor_residual'))
+  const dataAquisicao = String(formData.get('data_aquisicao') ?? '')
+  const vidaUtilAnos = Number(formData.get('vida_util_anos'))
+  const unidadeNegocioIdForm = String(formData.get('unidade_negocio_id') ?? '')
+  const unidadeNegocioId = unidadeNegocioIdForm === '' ? null : unidadeNegocioIdForm
+
+  if (!['benfeitoria', 'maquina'].includes(categoria) || !nome) {
+    return NextResponse.redirect(
+      new URL(`/dashboard/imobilizado/${id}/editar?error=dados_invalidos`, request.url),
+      { status: 303 }
+    )
+  }
+
+  if (!dataAquisicao || Number.isNaN(Date.parse(dataAquisicao))) {
+    return NextResponse.redirect(
+      new URL(`/dashboard/imobilizado/${id}/editar?error=data_aquisicao_invalida`, request.url),
+      { status: 303 }
+    )
+  }
+
+  const valoresValidos =
+    !Number.isNaN(valorAquisicao) &&
+    !Number.isNaN(valorResidual) &&
+    !Number.isNaN(vidaUtilAnos) &&
+    valorAquisicao > 0 &&
+    valorResidual >= 0 &&
+    valorResidual < valorAquisicao &&
+    vidaUtilAnos > 0
+
+  if (!valoresValidos) {
+    return NextResponse.redirect(
+      new URL(`/dashboard/imobilizado/${id}/editar?error=valores_invalidos`, request.url),
+      { status: 303 }
+    )
+  }
+
+  const supabase = await createClient()
+
+  if (unidadeNegocioId !== null) {
+    const { data: unidadeNegocio } = await supabase
+      .from('unidades_negocio')
+      .select('id')
+      .eq('id', unidadeNegocioId)
+      .eq('propriedade_id', usuarioAtual.propriedade_id)
+      .maybeSingle()
+
+    if (!unidadeNegocio) {
+      return NextResponse.redirect(
+        new URL(`/dashboard/imobilizado/${id}/editar?error=unidade_negocio_invalida`, request.url),
+        { status: 303 }
+      )
+    }
+  }
+
+  const { error: erroUpdate } = await supabase
+    .from('imobilizados')
+    .update({
+      categoria,
+      nome,
+      valor_aquisicao: valorAquisicao,
+      valor_residual: valorResidual,
+      data_aquisicao: dataAquisicao,
+      vida_util_anos: vidaUtilAnos,
+      unidade_negocio_id: unidadeNegocioId,
+    })
+    .eq('id', id)
+    .eq('propriedade_id', usuarioAtual.propriedade_id)
+
+  if (erroUpdate) {
+    return NextResponse.redirect(
+      new URL(`/dashboard/imobilizado/${id}/editar?error=erro_inesperado`, request.url),
+      { status: 303 }
+    )
+  }
+
+  return NextResponse.redirect(new URL(`/dashboard/imobilizado/${id}/editar`, request.url), {
+    status: 303,
+  })
+}
