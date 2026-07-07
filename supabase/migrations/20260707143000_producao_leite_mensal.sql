@@ -1,4 +1,5 @@
-create or replace view public.producao_leite_mensal as
+create or replace view public.producao_leite_mensal
+  with (security_invoker = true) as
 with mensal as (
   select
     unidade_negocio_id,
