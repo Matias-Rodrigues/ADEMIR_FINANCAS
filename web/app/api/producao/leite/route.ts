@@ -54,25 +54,41 @@ export async function POST(request: Request) {
     )
   }
 
-  const { error: erroUpsert } = await supabase.from('producao_leite').upsert(
-    {
-      propriedade_id: usuarioAtual.propriedade_id,
-      unidade_negocio_id: unidadeNegocioId,
-      data,
-      litros_comercial: litrosComercial,
-      litros_descarte: litrosDescarte,
-      litros_consumo: litrosConsumo,
-      criado_por: usuarioAtual.id,
-      origem: 'manual',
-    },
-    { onConflict: 'unidade_negocio_id,data' }
-  )
+  const { error: erroInsert } = await supabase.from('producao_leite').insert({
+    propriedade_id: usuarioAtual.propriedade_id,
+    unidade_negocio_id: unidadeNegocioId,
+    data,
+    litros_comercial: litrosComercial,
+    litros_descarte: litrosDescarte,
+    litros_consumo: litrosConsumo,
+    criado_por: usuarioAtual.id,
+    origem: 'manual',
+  })
 
-  if (erroUpsert) {
-    return NextResponse.redirect(
-      new URL(`/dashboard/producao/leite?data=${data}&error=erro_inesperado`, request.url),
-      { status: 303 }
-    )
+  if (erroInsert) {
+    if (erroInsert.code !== '23505') {
+      return NextResponse.redirect(
+        new URL(`/dashboard/producao/leite?data=${data}&error=erro_inesperado`, request.url),
+        { status: 303 }
+      )
+    }
+
+    const { error: erroUpdate } = await supabase
+      .from('producao_leite')
+      .update({
+        litros_comercial: litrosComercial,
+        litros_descarte: litrosDescarte,
+        litros_consumo: litrosConsumo,
+      })
+      .eq('unidade_negocio_id', unidadeNegocioId)
+      .eq('data', data)
+
+    if (erroUpdate) {
+      return NextResponse.redirect(
+        new URL(`/dashboard/producao/leite?data=${data}&error=erro_inesperado`, request.url),
+        { status: 303 }
+      )
+    }
   }
 
   return NextResponse.redirect(new URL('/dashboard/producao/leite', request.url), { status: 303 })
