@@ -170,6 +170,8 @@ export type Database = {
       }
       imobilizados: {
         Row: {
+          ativo: boolean
+          categoria: string
           created_at: string
           data_aquisicao: string
           id: string
@@ -177,9 +179,12 @@ export type Database = {
           propriedade_id: string
           unidade_negocio_id: string | null
           valor_aquisicao: number
+          valor_residual: number
           vida_util_anos: number
         }
         Insert: {
+          ativo?: boolean
+          categoria: string
           created_at?: string
           data_aquisicao: string
           id?: string
@@ -187,9 +192,12 @@ export type Database = {
           propriedade_id: string
           unidade_negocio_id?: string | null
           valor_aquisicao: number
+          valor_residual: number
           vida_util_anos: number
         }
         Update: {
+          ativo?: boolean
+          categoria?: string
           created_at?: string
           data_aquisicao?: string
           id?: string
@@ -197,6 +205,7 @@ export type Database = {
           propriedade_id?: string
           unidade_negocio_id?: string | null
           valor_aquisicao?: number
+          valor_residual?: number
           vida_util_anos?: number
         }
         Relationships: [
@@ -934,6 +943,66 @@ export type Database = {
       }
     }
     Views: {
+      imobilizados_depreciacao: {
+        Row: {
+          ativo: boolean | null
+          categoria: string | null
+          data_aquisicao: string | null
+          depreciacao_anual: number | null
+          depreciacao_mensal: number | null
+          id: string | null
+          nome: string | null
+          propriedade_id: string | null
+          unidade_negocio_id: string | null
+          valor_aquisicao: number | null
+          valor_residual: number | null
+          vida_util_anos: number | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria?: string | null
+          data_aquisicao?: string | null
+          depreciacao_anual?: never
+          depreciacao_mensal?: never
+          id?: string | null
+          nome?: string | null
+          propriedade_id?: string | null
+          unidade_negocio_id?: string | null
+          valor_aquisicao?: number | null
+          valor_residual?: number | null
+          vida_util_anos?: number | null
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string | null
+          data_aquisicao?: string | null
+          depreciacao_anual?: never
+          depreciacao_mensal?: never
+          id?: string | null
+          nome?: string | null
+          propriedade_id?: string | null
+          unidade_negocio_id?: string | null
+          valor_aquisicao?: number | null
+          valor_residual?: number | null
+          vida_util_anos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imobilizados_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imobilizados_unidade_negocio_id_fkey"
+            columns: ["unidade_negocio_id"]
+            isOneToOne: false
+            referencedRelation: "unidades_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       producao_leite_mensal: {
         Row: {
           litros_comercial: number | null
