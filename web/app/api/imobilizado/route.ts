@@ -57,6 +57,23 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient()
+
+  if (unidadeNegocioId !== null) {
+    const { data: unidadeNegocio } = await supabase
+      .from('unidades_negocio')
+      .select('id')
+      .eq('id', unidadeNegocioId)
+      .eq('propriedade_id', usuarioAtual.propriedade_id)
+      .maybeSingle()
+
+    if (!unidadeNegocio) {
+      return NextResponse.redirect(
+        new URL('/dashboard/imobilizado/novo?error=unidade_negocio_invalida', request.url),
+        { status: 303 }
+      )
+    }
+  }
+
   const { error: erroInsert } = await supabase.from('imobilizados').insert({
     propriedade_id: usuarioAtual.propriedade_id,
     unidade_negocio_id: unidadeNegocioId,

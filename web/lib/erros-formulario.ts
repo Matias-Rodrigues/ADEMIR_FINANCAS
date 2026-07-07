@@ -13,6 +13,7 @@ const MENSAGENS: Record<string, string> = {
   data_aquisicao_invalida: 'Informe uma data de aquisição válida.',
   valores_invalidos: 'Os valores informados não podem ser negativos.',
   unidade_negocio_nao_encontrada: 'Nenhuma unidade de negócio de leite cadastrada para esta propriedade.',
+  unidade_negocio_invalida: 'Selecione uma unidade de negócio válida.',
   categoria_origem_invalida: 'Selecione uma categoria de origem diferente da categoria de destino.',
   quantidade_invalida: 'Informe uma quantidade maior que zero.',
   erro_inesperado: 'Algo deu errado. Tente novamente.',
