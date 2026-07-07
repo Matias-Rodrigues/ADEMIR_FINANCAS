@@ -57,6 +57,16 @@ export default async function RelatorioProducaoPage({
         .order('mes')
     : { data: [] }
 
+  const { data: qualidadeMensal } = unidadeNegocioId
+    ? await supabase
+        .from('qualidade_leite')
+        .select('mes, ccs, cbt, gordura, proteina, esd')
+        .eq('unidade_negocio_id', unidadeNegocioId)
+        .gte('mes', `${ano}-01-01`)
+        .lte('mes', `${ano}-12-31`)
+        .order('mes')
+    : { data: [] }
+
   const composicaoPorMes = unidadeNegocioId
     ? await Promise.all(
         MESES.map(async (_, indice) => {
@@ -144,6 +154,34 @@ export default async function RelatorioProducaoPage({
                     {linha.categorias.find((c) => c.categoria === categoria.valor)?.quantidade ?? 0}
                   </td>
                 ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="overflow-x-auto">
+        <h2 className="mb-2 text-sm font-medium">Qualidade do leite</h2>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-input text-left">
+              <th className="p-2">Mês</th>
+              <th className="p-2">CCS</th>
+              <th className="p-2">CBT</th>
+              <th className="p-2">Gordura %</th>
+              <th className="p-2">Proteína %</th>
+              <th className="p-2">ESD %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(qualidadeMensal ?? []).map((linha) => (
+              <tr key={linha.mes} className="border-b border-input">
+                <td className="p-2">{MESES[new Date(linha.mes as string).getUTCMonth()]}</td>
+                <td className="p-2">{linha.ccs}</td>
+                <td className="p-2">{linha.cbt}</td>
+                <td className="p-2">{linha.gordura}</td>
+                <td className="p-2">{linha.proteina}</td>
+                <td className="p-2">{linha.esd}</td>
               </tr>
             ))}
           </tbody>
