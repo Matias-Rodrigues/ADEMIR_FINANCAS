@@ -1,5 +1,5 @@
 begin;
-select plan(4);
+select plan(5);
 
 insert into public.propriedades (id, nome) values ('11111111-1111-1111-1111-111111111111', 'Propriedade Ademir');
 insert into public.propriedade_modulos_contratados (propriedade_id, modulo, ativo)
@@ -38,6 +38,19 @@ select throws_ok(
     values ('11111111-1111-1111-1111-111111111111', '66666666-6666-6666-6666-666666666666', '2026-07-01', 900, '33333333-3333-3333-3333-333333333333')$$,
   'duplicate key value violates unique constraint "producao_leite_unidade_negocio_id_data_key"',
   'segundo lançamento no mesmo dia/unidade deve ser rejeitado pelo unique'
+);
+
+update public.producao_leite
+  set litros_comercial = 1200.5
+  where propriedade_id = '11111111-1111-1111-1111-111111111111'
+    and unidade_negocio_id = '66666666-6666-6666-6666-666666666666'
+    and data = '2026-07-01';
+
+select is(
+  (select litros_comercial from public.producao_leite
+    where unidade_negocio_id = '66666666-6666-6666-6666-666666666666' and data = '2026-07-01'),
+  1200.5,
+  'admin deve conseguir editar um lançamento existente de produção de leite'
 );
 
 select * from finish();

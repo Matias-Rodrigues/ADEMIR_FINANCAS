@@ -24,3 +24,8 @@ create policy "ver producao de leite"
 create policy "lancar producao de leite"
   on public.producao_leite for insert
   with check (propriedade_id = public.usuario_propriedade_id() and public.tem_permissao('producao', 'lancar'));
+
+create policy "editar producao de leite"
+  on public.producao_leite for update
+  using (propriedade_id = public.usuario_propriedade_id() and public.tem_permissao('producao', 'lancar'))
+  with check (propriedade_id = public.usuario_propriedade_id() and public.tem_permissao('producao', 'lancar'));
