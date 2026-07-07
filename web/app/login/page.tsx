@@ -2,8 +2,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { mensagemErro } from '@/lib/erros-formulario'
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
+  const mensagem = mensagemErro(error)
+
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-sm">
@@ -11,6 +19,7 @@ export default function LoginPage() {
           <CardTitle>Entrar</CardTitle>
         </CardHeader>
         <CardContent>
+          {mensagem && <p className="mb-4 text-sm text-destructive">{mensagem}</p>}
           <form method="POST" action="/api/auth/login" className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">E-mail</Label>
