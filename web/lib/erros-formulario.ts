@@ -10,6 +10,7 @@ const MENSAGENS: Record<string, string> = {
   nao_autorizado: 'Você não tem permissão para esta ação.',
   usuario_nao_encontrado: 'Usuário não encontrado.',
   data_invalida: 'Informe uma data válida.',
+  data_aquisicao_invalida: 'Informe uma data de aquisição válida.',
   valores_invalidos: 'Os valores informados não podem ser negativos.',
   unidade_negocio_nao_encontrada: 'Nenhuma unidade de negócio de leite cadastrada para esta propriedade.',
   categoria_origem_invalida: 'Selecione uma categoria de origem diferente da categoria de destino.',
