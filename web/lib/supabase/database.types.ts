@@ -1,3 +1,4 @@
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -735,6 +736,73 @@ export type Database = {
           nome?: string
         }
         Relationships: []
+      }
+      qualidade_leite: {
+        Row: {
+          cbt: number
+          ccs: number
+          created_at: string
+          criado_por: string
+          esd: number
+          gordura: number
+          id: string
+          mes: string
+          origem: string
+          propriedade_id: string
+          proteina: number
+          unidade_negocio_id: string
+        }
+        Insert: {
+          cbt: number
+          ccs: number
+          created_at?: string
+          criado_por: string
+          esd: number
+          gordura: number
+          id?: string
+          mes: string
+          origem?: string
+          propriedade_id: string
+          proteina: number
+          unidade_negocio_id: string
+        }
+        Update: {
+          cbt?: number
+          ccs?: number
+          created_at?: string
+          criado_por?: string
+          esd?: number
+          gordura?: number
+          id?: string
+          mes?: string
+          origem?: string
+          propriedade_id?: string
+          proteina?: number
+          unidade_negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualidade_leite_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualidade_leite_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualidade_leite_unidade_negocio_id_fkey"
+            columns: ["unidade_negocio_id"]
+            isOneToOne: false
+            referencedRelation: "unidades_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rateio_custo_compartilhado_itens: {
         Row: {
