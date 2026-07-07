@@ -28,6 +28,9 @@ export default async function ProducaoPage() {
         <Link href="/dashboard/producao/rebanho" className={buttonVariants({ variant: 'outline' })}>
           Movimentar rebanho
         </Link>
+        <Link href="/dashboard/producao/qualidade" className={buttonVariants({ variant: 'outline' })}>
+          Qualidade do leite
+        </Link>
       </nav>
     </main>
   )
