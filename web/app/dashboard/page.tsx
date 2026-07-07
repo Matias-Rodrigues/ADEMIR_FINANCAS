@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getUsuarioAtual } from '@/lib/auth/current-usuario'
+import { temPermissao } from '@/lib/auth/tem-permissao'
 import { Button } from '@/components/ui/button'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -16,6 +17,7 @@ export default async function DashboardPage() {
 
   const usuarioAtual = await getUsuarioAtual()
   const ehAdminOuDev = usuarioAtual?.papel === 'admin' || usuarioAtual?.papel === 'dev'
+  const podeVerProducao = await temPermissao('producao', 'ver')
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-4">
@@ -30,6 +32,11 @@ export default async function DashboardPage() {
               Usuários
             </Link>
           </>
+        )}
+        {podeVerProducao && (
+          <Link href="/dashboard/producao" className="underline">
+            Produção
+          </Link>
         )}
         <Link href="/dashboard/meu-plano" className="underline">
           Meu plano

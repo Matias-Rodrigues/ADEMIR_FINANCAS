@@ -100,6 +100,8 @@ export type Database = {
       }
       eventos_operacionais: {
         Row: {
+          categoria_animal: string | null
+          categoria_origem: string | null
           created_at: string
           criado_por: string
           data: string
@@ -113,6 +115,8 @@ export type Database = {
           unidade_negocio_id: string
         }
         Insert: {
+          categoria_animal?: string | null
+          categoria_origem?: string | null
           created_at?: string
           criado_por: string
           data: string
@@ -126,6 +130,8 @@ export type Database = {
           unidade_negocio_id: string
         }
         Update: {
+          categoria_animal?: string | null
+          categoria_origem?: string | null
           created_at?: string
           criado_por?: string
           data?: string
@@ -619,6 +625,67 @@ export type Database = {
           },
         ]
       }
+      producao_leite: {
+        Row: {
+          created_at: string
+          criado_por: string
+          data: string
+          id: string
+          litros_comercial: number
+          litros_consumo: number
+          litros_descarte: number
+          origem: string
+          propriedade_id: string
+          unidade_negocio_id: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por: string
+          data: string
+          id?: string
+          litros_comercial?: number
+          litros_consumo?: number
+          litros_descarte?: number
+          origem?: string
+          propriedade_id: string
+          unidade_negocio_id: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          data?: string
+          id?: string
+          litros_comercial?: number
+          litros_consumo?: number
+          litros_descarte?: number
+          origem?: string
+          propriedade_id?: string
+          unidade_negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producao_leite_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producao_leite_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producao_leite_unidade_negocio_id_fkey"
+            columns: ["unidade_negocio_id"]
+            isOneToOne: false
+            referencedRelation: "unidades_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       propriedade_modulos_contratados: {
         Row: {
           ativo: boolean
@@ -800,13 +867,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      producao_leite_mensal: {
+        Row: {
+          litros_comercial: number | null
+          litros_consumo: number | null
+          litros_descarte: number | null
+          media_diaria: number | null
+          media_por_vaca_lactacao_dia: number | null
+          mes: string | null
+          producao_total: number | null
+          unidade_negocio_id: string | null
+          vacas_lactacao: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producao_leite_unidade_negocio_id_fkey"
+            columns: ["unidade_negocio_id"]
+            isOneToOne: false
+            referencedRelation: "unidades_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      rebanho_composicao: {
+        Args: { p_data: string; p_unidade_negocio_id: string }
+        Returns: {
+          categoria: string
+          quantidade: number
+        }[]
+      }
       tem_permissao: {
         Args: { p_acao: string; p_modulo: string }
         Returns: boolean
       }
+      usuario_eh_admin: { Args: never; Returns: boolean }
       usuario_eh_dev: { Args: never; Returns: boolean }
       usuario_propriedade_id: { Args: never; Returns: string }
     }
