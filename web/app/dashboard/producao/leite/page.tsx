@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { redirect } from 'next/navigation'
+import { GravadorAudio } from './gravador-audio'
 
 export default async function LancamentoLeitePage({
   searchParams,
@@ -57,7 +58,12 @@ export default async function LancamentoLeitePage({
         </CardHeader>
         <CardContent>
           {mensagem && <p className="mb-4 text-sm text-destructive">{mensagem}</p>}
-          <form method="POST" action="/api/producao/leite" className="flex flex-col gap-4">
+          <form
+            method="POST"
+            action="/api/producao/leite"
+            encType="multipart/form-data"
+            className="flex flex-col gap-4"
+          >
             <div className="flex flex-col gap-2">
               <Label htmlFor="data">Data</Label>
               <Input id="data" name="data" type="date" defaultValue={dataSelecionada} required />
@@ -98,6 +104,7 @@ export default async function LancamentoLeitePage({
                 required
               />
             </div>
+            <GravadorAudio />
             <Button type="submit">{lancamentoExistente ? 'Salvar alterações' : 'Lançar'}</Button>
           </form>
         </CardContent>
