@@ -636,6 +636,7 @@ export type Database = {
       }
       producao_leite: {
         Row: {
+          audio_paths: string[] | null
           created_at: string
           criado_por: string
           data: string
@@ -643,11 +644,14 @@ export type Database = {
           litros_comercial: number
           litros_consumo: number
           litros_descarte: number
+          observacoes: string | null
           origem: string
           propriedade_id: string
+          transcricao: string | null
           unidade_negocio_id: string
         }
         Insert: {
+          audio_paths?: string[] | null
           created_at?: string
           criado_por: string
           data: string
@@ -655,11 +659,14 @@ export type Database = {
           litros_comercial?: number
           litros_consumo?: number
           litros_descarte?: number
+          observacoes?: string | null
           origem?: string
           propriedade_id: string
+          transcricao?: string | null
           unidade_negocio_id: string
         }
         Update: {
+          audio_paths?: string[] | null
           created_at?: string
           criado_por?: string
           data?: string
@@ -667,8 +674,10 @@ export type Database = {
           litros_comercial?: number
           litros_consumo?: number
           litros_descarte?: number
+          observacoes?: string | null
           origem?: string
           propriedade_id?: string
+          transcricao?: string | null
           unidade_negocio_id?: string
         }
         Relationships: [
