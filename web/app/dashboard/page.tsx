@@ -18,6 +18,7 @@ export default async function DashboardPage() {
   const usuarioAtual = await getUsuarioAtual()
   const ehAdminOuDev = usuarioAtual?.papel === 'admin' || usuarioAtual?.papel === 'dev'
   const podeVerProducao = await temPermissao('producao', 'ver')
+  const podeVerFinanceiroNegocio = await temPermissao('financeiro_negocio', 'ver')
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-4">
@@ -36,6 +37,11 @@ export default async function DashboardPage() {
         {podeVerProducao && (
           <Link href="/dashboard/producao" className="underline">
             Produção
+          </Link>
+        )}
+        {podeVerFinanceiroNegocio && (
+          <Link href="/dashboard/financeiro-negocio" className="underline">
+            Financeiro do negócio
           </Link>
         )}
         <Link href="/dashboard/meu-plano" className="underline">
