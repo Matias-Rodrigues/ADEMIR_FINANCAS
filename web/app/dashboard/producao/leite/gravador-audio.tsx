@@ -13,7 +13,6 @@ export function GravadorAudio() {
   const [clipes, setClipes] = useState<Clipe[]>([])
   const [gravando, setGravando] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const chunksRef = useRef<Blob[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
   function sincronizarInput(novosClipes: Clipe[]) {
@@ -31,16 +30,16 @@ export function GravadorAudio() {
   async function iniciarGravacao() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     const mediaRecorder = new MediaRecorder(stream)
-    chunksRef.current = []
+    const chunks: Blob[] = []
 
     mediaRecorder.ondataavailable = (evento) => {
       if (evento.data.size > 0) {
-        chunksRef.current.push(evento.data)
+        chunks.push(evento.data)
       }
     }
 
     mediaRecorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType })
+      const blob = new Blob(chunks, { type: mediaRecorder.mimeType })
       const novoClipe: Clipe = { id: crypto.randomUUID(), blob, url: URL.createObjectURL(blob) }
       setClipes((atuais) => {
         const atualizados = [...atuais, novoClipe]
