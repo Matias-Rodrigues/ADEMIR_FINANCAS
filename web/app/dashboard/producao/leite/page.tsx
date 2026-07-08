@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getUsuarioAtual } from '@/lib/auth/current-usuario'
 import { temPermissao } from '@/lib/auth/tem-permissao'
 import { getUnidadeNegocioLeiteId } from '@/lib/producao/unidade-negocio'
-import { mensagemErro } from '@/lib/erros-formulario'
+import { mensagemErro, mensagemAviso } from '@/lib/erros-formulario'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,7 @@ import { GravadorAudio } from './gravador-audio'
 export default async function LancamentoLeitePage({
   searchParams,
 }: {
-  searchParams: Promise<{ data?: string; error?: string }>
+  searchParams: Promise<{ data?: string; error?: string; aviso?: string }>
 }) {
   const usuarioAtual = await getUsuarioAtual()
   if (!usuarioAtual) {
@@ -25,8 +25,9 @@ export default async function LancamentoLeitePage({
     redirect('/dashboard')
   }
 
-  const { data: dataParam, error } = await searchParams
+  const { data: dataParam, error, aviso } = await searchParams
   const mensagem = mensagemErro(error)
+  const mensagemDeAviso = mensagemAviso(aviso)
   const dataSelecionada = dataParam ?? new Date().toISOString().slice(0, 10)
 
   const supabase = await createClient()
@@ -58,6 +59,7 @@ export default async function LancamentoLeitePage({
         </CardHeader>
         <CardContent>
           {mensagem && <p className="mb-4 text-sm text-destructive">{mensagem}</p>}
+          {mensagemDeAviso && <p className="mb-4 text-sm text-amber-600">{mensagemDeAviso}</p>}
           <form
             method="POST"
             action="/api/producao/leite"
