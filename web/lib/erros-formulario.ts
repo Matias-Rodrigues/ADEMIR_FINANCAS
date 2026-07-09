@@ -25,3 +25,14 @@ export function mensagemErro(codigo: string | undefined): string | null {
   }
   return MENSAGENS[codigo] ?? MENSAGENS.erro_inesperado
 }
+
+const AVISOS: Record<string, string> = {
+  audio_falhou: 'Números salvos, mas não conseguimos processar o áudio. Tente gravar de novo mais tarde.',
+}
+
+export function mensagemAviso(codigo: string | undefined): string | null {
+  if (!codigo) {
+    return null
+  }
+  return AVISOS[codigo] ?? null
+}
