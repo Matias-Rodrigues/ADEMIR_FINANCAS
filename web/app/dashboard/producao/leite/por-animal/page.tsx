@@ -9,6 +9,15 @@ import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { redirect } from 'next/navigation'
 
+const CATEGORIAS = [
+  { valor: 'vaca_lactacao', rotulo: 'Vaca em lactação' },
+  { valor: 'vaca_descarte', rotulo: 'Vaca de descarte' },
+  { valor: 'vaca_seca', rotulo: 'Vaca seca' },
+  { valor: 'novilha_coberta', rotulo: 'Novilha coberta' },
+  { valor: 'novilha_recria', rotulo: 'Novilha em recria' },
+  { valor: 'terneira_aleitamento', rotulo: 'Terneira em aleitamento' },
+] as const
+
 export default async function ProducaoPorAnimalPage({
   searchParams,
 }: {
@@ -34,10 +43,10 @@ export default async function ProducaoPorAnimalPage({
   const supabase = await createClient()
   const unidadeNegocioId = await getUnidadeNegocioLeiteId(supabase, usuarioAtual.propriedade_id)
 
-  const { data: animais } = unidadeNegocioId
+  const { data: animaisBrutos } = unidadeNegocioId
     ? await supabase
         .from('animais')
-        .select('id, brinco, nome')
+        .select('id, brinco, nome, categoria')
         .eq('unidade_negocio_id', unidadeNegocioId)
         .eq('categoria', 'vaca_lactacao')
         .eq('ativo', true)
@@ -56,6 +65,40 @@ export default async function ProducaoPorAnimalPage({
   const litrosPorAnimal = new Map(
     (lancamentosExistentes ?? []).map((lancamento) => [lancamento.animal_id, lancamento.litros])
   )
+
+  const { data: configuracao } = await supabase
+    .from('configuracoes_captura_animal')
+    .select('estilo_interacao, exibir_categoria')
+    .eq('usuario_id', usuarioAtual.id)
+    .maybeSingle()
+
+  const { data: ordemConfigurada } = await supabase
+    .from('ordem_captura_animal')
+    .select('animal_id, posicao')
+    .eq('usuario_id', usuarioAtual.id)
+
+  const posicaoPorAnimal = new Map(
+    (ordemConfigurada ?? []).map((linha) => [linha.animal_id, linha.posicao])
+  )
+
+  const animais = [...(animaisBrutos ?? [])].sort((a, b) => {
+    const posicaoA = posicaoPorAnimal.get(a.id)
+    const posicaoB = posicaoPorAnimal.get(b.id)
+
+    if (posicaoA !== undefined && posicaoB !== undefined) {
+      return posicaoA - posicaoB
+    }
+    if (posicaoA !== undefined) {
+      return -1
+    }
+    if (posicaoB !== undefined) {
+      return 1
+    }
+    return a.brinco.localeCompare(b.brinco)
+  })
+
+  const estiloInteracao = configuracao?.estilo_interacao ?? 'todos_visiveis'
+  const exibirCategoria = configuracao?.exibir_categoria ?? false
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-4 p-4">
@@ -81,7 +124,7 @@ export default async function ProducaoPorAnimalPage({
 
       {mensagem && <p className="text-sm text-destructive">{mensagem}</p>}
 
-      {(animais ?? []).length === 0 ? (
+      {animais.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Nenhum animal ativo em lactação cadastrado para esta unidade.
         </p>
@@ -89,12 +132,16 @@ export default async function ProducaoPorAnimalPage({
         <form method="POST" action="/api/producao/leite/por-animal" className="flex flex-col gap-4">
           <input type="hidden" name="data" value={data} />
           <input type="hidden" name="numero_ordenha" value={numeroOrdenha} />
-          {(animais ?? []).map((animal) => (
-            <div key={animal.id} className="flex flex-col gap-2">
-              <Label htmlFor={`litros_${animal.id}`}>
+          {animais.map((animal) => {
+            const rotuloCategoria = CATEGORIAS.find((c) => c.valor === animal.categoria)?.rotulo
+            const rotulo = (
+              <>
                 {animal.brinco}
                 {animal.nome && ` · ${animal.nome}`}
-              </Label>
+                {exibirCategoria && rotuloCategoria && ` · ${rotuloCategoria}`}
+              </>
+            )
+            const campo = (
               <Input
                 id={`litros_${animal.id}`}
                 name={`litros_${animal.id}`}
@@ -103,8 +150,27 @@ export default async function ProducaoPorAnimalPage({
                 min="0"
                 defaultValue={litrosPorAnimal.get(animal.id) ?? ''}
               />
-            </div>
-          ))}
+            )
+
+            if (estiloInteracao === 'tocar_para_revelar') {
+              return (
+                <details key={animal.id} className="rounded-lg border border-input p-3">
+                  <summary className="cursor-pointer font-medium">{rotulo}</summary>
+                  <div className="mt-2 flex flex-col gap-2">
+                    <Label htmlFor={`litros_${animal.id}`}>Litros</Label>
+                    {campo}
+                  </div>
+                </details>
+              )
+            }
+
+            return (
+              <div key={animal.id} className="flex flex-col gap-2">
+                <Label htmlFor={`litros_${animal.id}`}>{rotulo}</Label>
+                {campo}
+              </div>
+            )
+          })}
           <Button type="submit">Salvar lançamentos</Button>
         </form>
       )}
