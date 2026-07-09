@@ -54,6 +54,7 @@ export default async function EditarAnimalPage({
   const { data: maes } = await supabase
     .from('animais')
     .select('id, brinco, nome')
+    .eq('propriedade_id', usuarioAtual.propriedade_id)
     .eq('sexo', 'femea')
     .neq('id', animal.id)
     .order('brinco')
