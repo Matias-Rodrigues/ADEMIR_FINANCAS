@@ -16,6 +16,10 @@ const MENSAGENS: Record<string, string> = {
   unidade_negocio_invalida: 'Selecione uma unidade de negócio válida.',
   categoria_origem_invalida: 'Selecione uma categoria de origem diferente da categoria de destino.',
   quantidade_invalida: 'Informe uma quantidade maior que zero.',
+  brinco_duplicado: 'Já existe um animal cadastrado com este brinco.',
+  data_nascimento_invalida: 'Informe uma data de nascimento válida (não pode ser no futuro).',
+  mae_invalida: 'Selecione uma mãe válida.',
+  ordenha_invalida: 'Informe um número de ordenha válido.',
   erro_inesperado: 'Algo deu errado. Tente novamente.',
 }
 
