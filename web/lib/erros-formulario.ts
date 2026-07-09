@@ -20,6 +20,7 @@ const MENSAGENS: Record<string, string> = {
   data_nascimento_invalida: 'Informe uma data de nascimento válida (não pode ser no futuro).',
   mae_invalida: 'Selecione uma mãe válida.',
   ordenha_invalida: 'Informe um número de ordenha válido.',
+  peso_invalido: 'Informe um peso maior que zero.',
   erro_inesperado: 'Algo deu errado. Tente novamente.',
 }
 

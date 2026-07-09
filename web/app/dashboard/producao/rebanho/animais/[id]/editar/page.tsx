@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
+import { GraficoPeso } from './grafico-peso'
 import { notFound, redirect } from 'next/navigation'
+import Link from 'next/link'
 
 const CATEGORIAS = [
   { valor: 'vaca_lactacao', rotulo: 'Vaca em lactação' },
@@ -58,6 +60,17 @@ export default async function EditarAnimalPage({
     .eq('sexo', 'femea')
     .neq('id', animal.id)
     .order('brinco')
+
+  const { data: pesagensAscendente } = await supabase
+    .from('pesagens_animal')
+    .select('id, data, peso_kg, observacao')
+    .eq('animal_id', animal.id)
+    .eq('propriedade_id', usuarioAtual.propriedade_id)
+    .order('data', { ascending: true })
+
+  const pesagens = pesagensAscendente ?? []
+  const pesagensRecentesPrimeiro = [...pesagens].reverse()
+  const hoje = new Date().toISOString().slice(0, 10)
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-4 p-4">
@@ -133,6 +146,73 @@ export default async function EditarAnimalPage({
             <Button type="submit" variant={animal.ativo ? 'destructive' : 'default'}>
               {animal.ativo ? 'Dar baixa' : 'Reativar'}
             </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Pesagens</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <GraficoPeso pesagens={pesagens} />
+
+          {pesagensRecentesPrimeiro.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma pesagem registrada ainda.</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {pesagensRecentesPrimeiro.map((pesagem) => (
+                <li
+                  key={pesagem.id}
+                  className="flex items-center justify-between rounded-lg border border-input p-3 text-sm"
+                >
+                  <div>
+                    <p className="font-medium">
+                      {pesagem.data} · {pesagem.peso_kg} kg
+                    </p>
+                    {pesagem.observacao && (
+                      <p className="text-muted-foreground">{pesagem.observacao}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/dashboard/producao/rebanho/animais/${animal.id}/pesagens/${pesagem.id}/editar`}
+                      className="text-sm underline"
+                    >
+                      Editar
+                    </Link>
+                    <form
+                      method="POST"
+                      action={`/api/producao/animais/${animal.id}/pesagens/${pesagem.id}/excluir`}
+                    >
+                      <Button type="submit" variant="destructive" size="sm">
+                        Excluir
+                      </Button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <form
+            method="POST"
+            action={`/api/producao/animais/${animal.id}/pesagens`}
+            className="flex flex-col gap-4"
+          >
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="data">Data</Label>
+              <Input id="data" name="data" type="date" defaultValue={hoje} required />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="peso_kg">Peso (kg)</Label>
+              <Input id="peso_kg" name="peso_kg" type="number" step="0.01" min="0.01" required />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="observacao">Observação (opcional)</Label>
+              <Input id="observacao" name="observacao" />
+            </div>
+            <Button type="submit">Registrar pesagem</Button>
           </form>
         </CardContent>
       </Card>
