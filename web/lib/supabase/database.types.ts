@@ -711,6 +711,71 @@ export type Database = {
           },
         ]
       }
+      producao_animal: {
+        Row: {
+          animal_id: string
+          created_at: string
+          criado_por: string
+          data: string
+          id: string
+          litros: number
+          numero_ordenha: number
+          propriedade_id: string
+          unidade_negocio_id: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          criado_por: string
+          data: string
+          id?: string
+          litros: number
+          numero_ordenha: number
+          propriedade_id: string
+          unidade_negocio_id: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          criado_por?: string
+          data?: string
+          id?: string
+          litros?: number
+          numero_ordenha?: number
+          propriedade_id?: string
+          unidade_negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producao_animal_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producao_animal_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producao_animal_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producao_animal_unidade_negocio_id_fkey"
+            columns: ["unidade_negocio_id"]
+            isOneToOne: false
+            referencedRelation: "unidades_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       producao_leite: {
         Row: {
           audio_paths: string[] | null
@@ -1082,6 +1147,23 @@ export type Database = {
           },
           {
             foreignKeyName: "imobilizados_unidade_negocio_id_fkey"
+            columns: ["unidade_negocio_id"]
+            isOneToOne: false
+            referencedRelation: "unidades_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      producao_animal_total_dia: {
+        Row: {
+          animais_lancados: number | null
+          data: string | null
+          total_produzido: number | null
+          unidade_negocio_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producao_animal_unidade_negocio_id_fkey"
             columns: ["unidade_negocio_id"]
             isOneToOne: false
             referencedRelation: "unidades_negocio"
