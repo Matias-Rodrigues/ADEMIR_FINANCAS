@@ -54,6 +54,8 @@ export async function POST(request: Request) {
 
   const idsValidos = new Set((animaisValidos ?? []).map((animal) => animal.id))
 
+  let algumLancamentoFalhou = false
+
   for (const [chave, valor] of formData.entries()) {
     if (!chave.startsWith('litros_')) {
       continue
@@ -81,14 +83,33 @@ export async function POST(request: Request) {
       criado_por: usuarioAtual.id,
     })
 
-    if (erroInsert && erroInsert.code === '23505') {
-      await supabase
+    if (erroInsert) {
+      if (erroInsert.code !== '23505') {
+        algumLancamentoFalhou = true
+        continue
+      }
+
+      const { error: erroUpdate } = await supabase
         .from('producao_animal')
         .update({ litros })
         .eq('animal_id', animalId)
         .eq('data', data)
         .eq('numero_ordenha', numeroOrdenha)
+
+      if (erroUpdate) {
+        algumLancamentoFalhou = true
+      }
     }
+  }
+
+  if (algumLancamentoFalhou) {
+    return NextResponse.redirect(
+      new URL(
+        `/dashboard/producao/leite/por-animal?data=${data}&ordenha=${numeroOrdenha}&error=erro_inesperado`,
+        request.url
+      ),
+      { status: 303 }
+    )
   }
 
   return NextResponse.redirect(
