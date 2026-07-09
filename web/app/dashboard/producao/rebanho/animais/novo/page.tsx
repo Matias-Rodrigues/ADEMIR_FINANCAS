@@ -40,6 +40,7 @@ export default async function NovoAnimalPage({
   const { data: maes } = await supabase
     .from('animais')
     .select('id, brinco, nome')
+    .eq('propriedade_id', usuarioAtual.propriedade_id)
     .eq('sexo', 'femea')
     .order('brinco')
 

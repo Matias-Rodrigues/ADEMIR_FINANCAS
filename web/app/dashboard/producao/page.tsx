@@ -22,6 +22,12 @@ export default async function ProducaoPage() {
         <Link href="/dashboard/producao/leite" className={buttonVariants({ variant: 'default' })}>
           Lançar produção do dia
         </Link>
+        <Link
+          href="/dashboard/producao/leite/por-animal"
+          className={buttonVariants({ variant: 'outline' })}
+        >
+          Lançar produção por animal
+        </Link>
         <Link href="/dashboard/producao/relatorio" className={buttonVariants({ variant: 'outline' })}>
           Relatório mensal
         </Link>

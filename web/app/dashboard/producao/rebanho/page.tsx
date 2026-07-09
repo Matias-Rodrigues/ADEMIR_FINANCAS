@@ -3,12 +3,13 @@ import { getUsuarioAtual } from '@/lib/auth/current-usuario'
 import { temPermissao } from '@/lib/auth/tem-permissao'
 import { getUnidadeNegocioLeiteId } from '@/lib/producao/unidade-negocio'
 import { mensagemErro } from '@/lib/erros-formulario'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
 const CATEGORIAS = [
   { valor: 'vaca_lactacao', rotulo: 'Vaca em lactação' },
@@ -76,6 +77,13 @@ export default async function RebanhoPage({
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-4 p-4">
+      <Link
+        href="/dashboard/producao/rebanho/animais"
+        className={buttonVariants({ variant: 'outline' })}
+      >
+        Ver/gerenciar animais
+      </Link>
+
       <div className="flex flex-col gap-2">
         <h2 className="text-sm font-medium">Composição atual do rebanho</h2>
         <ul className="flex flex-col gap-1">
