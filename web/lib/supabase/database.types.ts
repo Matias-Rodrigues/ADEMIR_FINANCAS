@@ -478,6 +478,67 @@ export type Database = {
           },
         ]
       }
+      medicamentos_animal: {
+        Row: {
+          animal_id: string
+          created_at: string
+          criado_por: string
+          data: string
+          data_liberacao: string | null
+          dias_carencia: number
+          id: string
+          observacao: string | null
+          produto: string
+          propriedade_id: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          criado_por: string
+          data: string
+          data_liberacao?: string | null
+          dias_carencia: number
+          id?: string
+          observacao?: string | null
+          produto: string
+          propriedade_id: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          criado_por?: string
+          data?: string
+          data_liberacao?: string | null
+          dias_carencia?: number
+          id?: string
+          observacao?: string | null
+          produto?: string
+          propriedade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicamentos_animal_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medicamentos_animal_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medicamentos_animal_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       obrigacoes_credito: {
         Row: {
           created_at: string
@@ -1140,6 +1201,64 @@ export type Database = {
           },
           {
             foreignKeyName: "usuarios_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vacinas_animal: {
+        Row: {
+          animal_id: string
+          created_at: string
+          criado_por: string
+          data: string
+          id: string
+          observacao: string | null
+          produto: string
+          propriedade_id: string
+          proxima_dose_prevista: string | null
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          criado_por: string
+          data: string
+          id?: string
+          observacao?: string | null
+          produto: string
+          propriedade_id: string
+          proxima_dose_prevista?: string | null
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          criado_por?: string
+          data?: string
+          id?: string
+          observacao?: string | null
+          produto?: string
+          propriedade_id?: string
+          proxima_dose_prevista?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacinas_animal_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacinas_animal_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacinas_animal_propriedade_id_fkey"
             columns: ["propriedade_id"]
             isOneToOne: false
             referencedRelation: "propriedades"
