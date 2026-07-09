@@ -80,6 +80,15 @@ export default async function EditarAnimalPage({
 
   const vacinas = vacinasDb ?? []
 
+  const { data: medicamentosDb } = await supabase
+    .from('medicamentos_animal')
+    .select('id, data, produto, dias_carencia, data_liberacao, observacao')
+    .eq('animal_id', animal.id)
+    .eq('propriedade_id', usuarioAtual.propriedade_id)
+    .order('data', { ascending: false })
+
+  const medicamentos = medicamentosDb ?? []
+
   const hoje = new Date().toISOString().slice(0, 10)
 
   return (
@@ -302,6 +311,96 @@ export default async function EditarAnimalPage({
                 <Input id="vacina_observacao" name="observacao" />
               </div>
               <Button type="submit">Registrar vacina</Button>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Medicamentos</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          {medicamentos.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum medicamento registrado ainda.</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {medicamentos.map((medicamento) => {
+                const emCarencia =
+                  medicamento.data_liberacao !== null && medicamento.data_liberacao > hoje
+
+                return (
+                  <li
+                    key={medicamento.id}
+                    className="flex items-center justify-between rounded-lg border border-input p-3 text-sm"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {medicamento.data} · {medicamento.produto} · {medicamento.dias_carencia} dias
+                        de carência
+                      </p>
+                      {emCarencia && (
+                        <p className="text-destructive">
+                          Em carência até {medicamento.data_liberacao}
+                        </p>
+                      )}
+                      {medicamento.observacao && (
+                        <p className="text-muted-foreground">{medicamento.observacao}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/dashboard/producao/rebanho/animais/${animal.id}/medicamentos/${medicamento.id}/editar`}
+                        className="text-sm underline"
+                      >
+                        Editar
+                      </Link>
+                      <form
+                        method="POST"
+                        action={`/api/producao/animais/${animal.id}/medicamentos/${medicamento.id}/excluir`}
+                      >
+                        <Button type="submit" variant="destructive" size="sm">
+                          Excluir
+                        </Button>
+                      </form>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+
+          {animal.ativo && (
+            <form
+              method="POST"
+              action={`/api/producao/animais/${animal.id}/medicamentos`}
+              className="flex flex-col gap-4"
+            >
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="medicamento_data">Data</Label>
+                <Input id="medicamento_data" name="data" type="date" defaultValue={hoje} required />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="medicamento_produto">Produto</Label>
+                <Input id="medicamento_produto" name="produto" required />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="medicamento_dias_carencia">Dias de carência</Label>
+                <Input
+                  id="medicamento_dias_carencia"
+                  name="dias_carencia"
+                  type="number"
+                  min="0"
+                  step="1"
+                  defaultValue={0}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="medicamento_observacao">Observação (opcional)</Label>
+                <Input id="medicamento_observacao" name="observacao" />
+              </div>
+              <Button type="submit">Registrar medicamento</Button>
             </form>
           )}
         </CardContent>
