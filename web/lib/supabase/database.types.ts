@@ -163,6 +163,55 @@ export type Database = {
           },
         ]
       }
+      configuracoes_captura_leite: {
+        Row: {
+          created_at: string
+          criado_por: string
+          estilo_interacao: string
+          id: string
+          propriedade_id: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por: string
+          estilo_interacao?: string
+          id?: string
+          propriedade_id: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          estilo_interacao?: string
+          id?: string
+          propriedade_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "configuracoes_captura_leite_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "configuracoes_captura_leite_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "configuracoes_captura_leite_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: true
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documentos_fiscais: {
         Row: {
           arquivo_url: string | null
@@ -681,6 +730,48 @@ export type Database = {
           },
           {
             foreignKeyName: "ordem_captura_animal_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ordem_captura_leite: {
+        Row: {
+          campo: string
+          created_at: string
+          id: string
+          posicao: number
+          propriedade_id: string
+          usuario_id: string
+        }
+        Insert: {
+          campo: string
+          created_at?: string
+          id?: string
+          posicao: number
+          propriedade_id: string
+          usuario_id: string
+        }
+        Update: {
+          campo?: string
+          created_at?: string
+          id?: string
+          posicao?: number
+          propriedade_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordem_captura_leite_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordem_captura_leite_usuario_id_fkey"
             columns: ["usuario_id"]
             isOneToOne: false
             referencedRelation: "usuarios"
