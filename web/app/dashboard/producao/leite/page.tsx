@@ -10,6 +10,12 @@ import { Label } from '@/components/ui/label'
 import { redirect } from 'next/navigation'
 import { GravadorAudio } from './gravador-audio'
 
+const CAMPOS = [
+  { valor: 'litros_comercial', rotulo: 'Litros comercial' },
+  { valor: 'litros_descarte', rotulo: 'Litros descarte' },
+  { valor: 'litros_consumo', rotulo: 'Litros consumo' },
+] as const
+
 export default async function LancamentoLeitePage({
   searchParams,
 }: {
@@ -51,6 +57,45 @@ export default async function LancamentoLeitePage({
         .limit(7)
     : { data: [] }
 
+  const { data: configuracao } = await supabase
+    .from('configuracoes_captura_leite')
+    .select('estilo_interacao')
+    .eq('usuario_id', usuarioAtual.id)
+    .maybeSingle()
+
+  const { data: ordemConfigurada } = await supabase
+    .from('ordem_captura_leite')
+    .select('campo, posicao')
+    .eq('usuario_id', usuarioAtual.id)
+
+  const posicaoPorCampo = new Map(
+    (ordemConfigurada ?? []).map((linha) => [linha.campo, linha.posicao])
+  )
+
+  const campos = [...CAMPOS].sort((a, b) => {
+    const posicaoA = posicaoPorCampo.get(a.valor)
+    const posicaoB = posicaoPorCampo.get(b.valor)
+
+    if (posicaoA !== undefined && posicaoB !== undefined) {
+      return posicaoA - posicaoB
+    }
+    if (posicaoA !== undefined) {
+      return -1
+    }
+    if (posicaoB !== undefined) {
+      return 1
+    }
+    return 0
+  })
+
+  const estiloInteracao = configuracao?.estilo_interacao ?? 'todos_visiveis'
+
+  const valorPorCampo: Record<string, number> = {
+    litros_comercial: lancamentoExistente?.litros_comercial ?? 0,
+    litros_descarte: lancamentoExistente?.litros_descarte ?? 0,
+    litros_consumo: lancamentoExistente?.litros_consumo ?? 0,
+  }
+
   return (
     <main className="mx-auto flex max-w-md flex-col gap-4 p-4">
       <Card>
@@ -70,42 +115,35 @@ export default async function LancamentoLeitePage({
               <Label htmlFor="data">Data</Label>
               <Input id="data" name="data" type="date" defaultValue={dataSelecionada} required />
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="litros_comercial">Litros comercial</Label>
-              <Input
-                id="litros_comercial"
-                name="litros_comercial"
-                type="number"
-                step="0.01"
-                min="0"
-                defaultValue={lancamentoExistente?.litros_comercial ?? 0}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="litros_descarte">Litros descarte</Label>
-              <Input
-                id="litros_descarte"
-                name="litros_descarte"
-                type="number"
-                step="0.01"
-                min="0"
-                defaultValue={lancamentoExistente?.litros_descarte ?? 0}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="litros_consumo">Litros consumo</Label>
-              <Input
-                id="litros_consumo"
-                name="litros_consumo"
-                type="number"
-                step="0.01"
-                min="0"
-                defaultValue={lancamentoExistente?.litros_consumo ?? 0}
-                required
-              />
-            </div>
+            {campos.map((campo) => {
+              const inputCampo = (
+                <Input
+                  id={campo.valor}
+                  name={campo.valor}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={valorPorCampo[campo.valor]}
+                  required
+                />
+              )
+
+              if (estiloInteracao === 'tocar_para_revelar') {
+                return (
+                  <details key={campo.valor} className="rounded-lg border border-input p-3">
+                    <summary className="cursor-pointer font-medium">{campo.rotulo}</summary>
+                    <div className="mt-2 flex flex-col gap-2">{inputCampo}</div>
+                  </details>
+                )
+              }
+
+              return (
+                <div key={campo.valor} className="flex flex-col gap-2">
+                  <Label htmlFor={campo.valor}>{campo.rotulo}</Label>
+                  {inputCampo}
+                </div>
+              )
+            })}
             <GravadorAudio />
             <Button type="submit">{lancamentoExistente ? 'Salvar alterações' : 'Lançar'}</Button>
           </form>
