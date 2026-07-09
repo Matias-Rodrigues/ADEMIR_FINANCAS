@@ -30,6 +30,10 @@ export function ehAdminOuDev(usuario: UsuarioAtual | null): usuario is UsuarioAt
   return usuario !== null && (usuario.papel === 'admin' || usuario.papel === 'dev')
 }
 
+export function ehDev(usuario: UsuarioAtual | null): usuario is UsuarioAtual {
+  return usuario !== null && usuario.papel === 'dev'
+}
+
 export async function requireAdmin(): Promise<UsuarioAtual> {
   const usuario = await getUsuarioAtual()
   if (!ehAdminOuDev(usuario)) {

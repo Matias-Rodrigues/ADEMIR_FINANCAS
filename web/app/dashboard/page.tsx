@@ -17,6 +17,7 @@ export default async function DashboardPage() {
 
   const usuarioAtual = await getUsuarioAtual()
   const ehAdminOuDev = usuarioAtual?.papel === 'admin' || usuarioAtual?.papel === 'dev'
+  const ehDevEstrito = usuarioAtual?.papel === 'dev'
   const podeVerProducao = await temPermissao('producao', 'ver')
   const podeVerFinanceiroNegocio = await temPermissao('financeiro_negocio', 'ver')
 
@@ -33,6 +34,11 @@ export default async function DashboardPage() {
               Usuários
             </Link>
           </>
+        )}
+        {ehDevEstrito && (
+          <Link href="/dashboard/admin/captura-animal" className="underline">
+            Motor de captura configurável
+          </Link>
         )}
         {podeVerProducao && (
           <Link href="/dashboard/producao" className="underline">
