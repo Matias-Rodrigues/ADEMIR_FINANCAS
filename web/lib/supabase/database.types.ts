@@ -34,6 +34,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      animais: {
+        Row: {
+          ativo: boolean
+          brinco: string
+          categoria: string
+          created_at: string
+          criado_por: string
+          data_nascimento: string | null
+          id: string
+          mae_id: string | null
+          nome: string | null
+          pai_texto: string | null
+          propriedade_id: string
+          sexo: string
+          unidade_negocio_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          brinco: string
+          categoria: string
+          created_at?: string
+          criado_por: string
+          data_nascimento?: string | null
+          id?: string
+          mae_id?: string | null
+          nome?: string | null
+          pai_texto?: string | null
+          propriedade_id: string
+          sexo: string
+          unidade_negocio_id: string
+        }
+        Update: {
+          ativo?: boolean
+          brinco?: string
+          categoria?: string
+          created_at?: string
+          criado_por?: string
+          data_nascimento?: string | null
+          id?: string
+          mae_id?: string | null
+          nome?: string | null
+          pai_texto?: string | null
+          propriedade_id?: string
+          sexo?: string
+          unidade_negocio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animais_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animais_mae_id_fkey"
+            columns: ["mae_id"]
+            isOneToOne: false
+            referencedRelation: "animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animais_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animais_unidade_negocio_id_fkey"
+            columns: ["unidade_negocio_id"]
+            isOneToOne: false
+            referencedRelation: "unidades_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documentos_fiscais: {
         Row: {
           arquivo_url: string | null
