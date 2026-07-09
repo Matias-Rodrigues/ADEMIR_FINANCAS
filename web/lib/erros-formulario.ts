@@ -21,6 +21,7 @@ const MENSAGENS: Record<string, string> = {
   mae_invalida: 'Selecione uma mãe válida.',
   ordenha_invalida: 'Informe um número de ordenha válido.',
   peso_invalido: 'Informe um peso maior que zero.',
+  animal_inativo: 'Este animal está inativo e não pode receber novas pesagens.',
   erro_inesperado: 'Algo deu errado. Tente novamente.',
 }
 

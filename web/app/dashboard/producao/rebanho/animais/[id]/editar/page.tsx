@@ -195,25 +195,27 @@ export default async function EditarAnimalPage({
             </ul>
           )}
 
-          <form
-            method="POST"
-            action={`/api/producao/animais/${animal.id}/pesagens`}
-            className="flex flex-col gap-4"
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="data">Data</Label>
-              <Input id="data" name="data" type="date" defaultValue={hoje} required />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="peso_kg">Peso (kg)</Label>
-              <Input id="peso_kg" name="peso_kg" type="number" step="0.01" min="0.01" required />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="observacao">Observação (opcional)</Label>
-              <Input id="observacao" name="observacao" />
-            </div>
-            <Button type="submit">Registrar pesagem</Button>
-          </form>
+          {animal.ativo && (
+            <form
+              method="POST"
+              action={`/api/producao/animais/${animal.id}/pesagens`}
+              className="flex flex-col gap-4"
+            >
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="data">Data</Label>
+                <Input id="data" name="data" type="date" defaultValue={hoje} required />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="peso_kg">Peso (kg)</Label>
+                <Input id="peso_kg" name="peso_kg" type="number" step="0.01" min="0.01" required />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="observacao">Observação (opcional)</Label>
+                <Input id="observacao" name="observacao" />
+              </div>
+              <Button type="submit">Registrar pesagem</Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </main>

@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getUsuarioAtual } from '@/lib/auth/current-usuario'
 import { temPermissao } from '@/lib/auth/tem-permissao'
-import { animalPertenceAPropriedade } from '@/lib/producao/validar-animal'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -40,9 +39,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const supabase = await createClient()
-  const animalValido = await animalPertenceAPropriedade(supabase, id, usuarioAtual.propriedade_id)
-  if (!animalValido) {
+  const { data: animal } = await supabase
+    .from('animais')
+    .select('ativo')
+    .eq('id', id)
+    .eq('propriedade_id', usuarioAtual.propriedade_id)
+    .maybeSingle()
+
+  if (!animal) {
     return redirecionarComErro('erro_inesperado')
+  }
+
+  if (!animal.ativo) {
+    return redirecionarComErro('animal_inativo')
   }
 
   const { error: erroInsert } = await supabase.from('pesagens_animal').insert({
