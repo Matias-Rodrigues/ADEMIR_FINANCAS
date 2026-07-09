@@ -679,6 +679,61 @@ export type Database = {
           },
         ]
       }
+      pesagens_animal: {
+        Row: {
+          animal_id: string
+          created_at: string
+          criado_por: string
+          data: string
+          id: string
+          observacao: string | null
+          peso_kg: number
+          propriedade_id: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          criado_por: string
+          data: string
+          id?: string
+          observacao?: string | null
+          peso_kg: number
+          propriedade_id: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          criado_por?: string
+          data?: string
+          id?: string
+          observacao?: string | null
+          peso_kg?: number
+          propriedade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pesagens_animal_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pesagens_animal_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pesagens_animal_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pessoas_fisicas: {
         Row: {
           cpf: string
