@@ -111,6 +111,58 @@ export type Database = {
           },
         ]
       }
+      configuracoes_captura_animal: {
+        Row: {
+          created_at: string
+          criado_por: string
+          estilo_interacao: string
+          exibir_categoria: boolean
+          id: string
+          propriedade_id: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por: string
+          estilo_interacao?: string
+          exibir_categoria?: boolean
+          id?: string
+          propriedade_id: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          estilo_interacao?: string
+          exibir_categoria?: boolean
+          id?: string
+          propriedade_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "configuracoes_captura_animal_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "configuracoes_captura_animal_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "configuracoes_captura_animal_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: true
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documentos_fiscais: {
         Row: {
           arquivo_url: string | null
@@ -583,6 +635,55 @@ export type Database = {
             columns: ["unidade_negocio_id"]
             isOneToOne: false
             referencedRelation: "unidades_negocio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ordem_captura_animal: {
+        Row: {
+          animal_id: string
+          created_at: string
+          id: string
+          posicao: number
+          propriedade_id: string
+          usuario_id: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          id?: string
+          posicao: number
+          propriedade_id: string
+          usuario_id: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          id?: string
+          posicao?: number
+          propriedade_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordem_captura_animal_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordem_captura_animal_propriedade_id_fkey"
+            columns: ["propriedade_id"]
+            isOneToOne: false
+            referencedRelation: "propriedades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordem_captura_animal_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
