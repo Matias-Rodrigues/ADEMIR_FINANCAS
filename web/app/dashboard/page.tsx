@@ -36,9 +36,14 @@ export default async function DashboardPage() {
           </>
         )}
         {ehDevEstrito && (
-          <Link href="/dashboard/admin/captura-animal" className="underline">
-            Motor de captura configurável
-          </Link>
+          <>
+            <Link href="/dashboard/admin/captura-animal" className="underline">
+              Motor de captura configurável
+            </Link>
+            <Link href="/dashboard/admin/captura-leite" className="underline">
+              Motor de captura — Produção de leite
+            </Link>
+          </>
         )}
         {podeVerProducao && (
           <Link href="/dashboard/producao" className="underline">
