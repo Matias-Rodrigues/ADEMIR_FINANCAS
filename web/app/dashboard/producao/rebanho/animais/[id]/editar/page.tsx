@@ -70,6 +70,16 @@ export default async function EditarAnimalPage({
 
   const pesagens = pesagensAscendente ?? []
   const pesagensRecentesPrimeiro = [...pesagens].reverse()
+
+  const { data: vacinasDb } = await supabase
+    .from('vacinas_animal')
+    .select('id, data, produto, proxima_dose_prevista, observacao')
+    .eq('animal_id', animal.id)
+    .eq('propriedade_id', usuarioAtual.propriedade_id)
+    .order('data', { ascending: false })
+
+  const vacinas = vacinasDb ?? []
+
   const hoje = new Date().toISOString().slice(0, 10)
 
   return (
@@ -214,6 +224,84 @@ export default async function EditarAnimalPage({
                 <Input id="observacao" name="observacao" />
               </div>
               <Button type="submit">Registrar pesagem</Button>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Vacinas</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          {vacinas.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma vacina registrada ainda.</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {vacinas.map((vacina) => (
+                <li
+                  key={vacina.id}
+                  className="flex items-center justify-between rounded-lg border border-input p-3 text-sm"
+                >
+                  <div>
+                    <p className="font-medium">
+                      {vacina.data} · {vacina.produto}
+                    </p>
+                    {vacina.proxima_dose_prevista && (
+                      <p className="text-muted-foreground">
+                        Próxima dose prevista: {vacina.proxima_dose_prevista}
+                      </p>
+                    )}
+                    {vacina.observacao && (
+                      <p className="text-muted-foreground">{vacina.observacao}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/dashboard/producao/rebanho/animais/${animal.id}/vacinas/${vacina.id}/editar`}
+                      className="text-sm underline"
+                    >
+                      Editar
+                    </Link>
+                    <form
+                      method="POST"
+                      action={`/api/producao/animais/${animal.id}/vacinas/${vacina.id}/excluir`}
+                    >
+                      <Button type="submit" variant="destructive" size="sm">
+                        Excluir
+                      </Button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {animal.ativo && (
+            <form
+              method="POST"
+              action={`/api/producao/animais/${animal.id}/vacinas`}
+              className="flex flex-col gap-4"
+            >
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="vacina_data">Data</Label>
+                <Input id="vacina_data" name="data" type="date" defaultValue={hoje} required />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="vacina_produto">Produto</Label>
+                <Input id="vacina_produto" name="produto" required />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="vacina_proxima_dose_prevista">
+                  Próxima dose prevista (opcional)
+                </Label>
+                <Input id="vacina_proxima_dose_prevista" name="proxima_dose_prevista" type="date" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="vacina_observacao">Observação (opcional)</Label>
+                <Input id="vacina_observacao" name="observacao" />
+              </div>
+              <Button type="submit">Registrar vacina</Button>
             </form>
           )}
         </CardContent>
