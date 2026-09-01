@@ -1,147 +1,42 @@
-# ADEMIR_FINANÇAS — CRM/ERP para Gestão de Propriedade Rural
+# ADEMIR_FINANÇAS — CRM/ERP de Gestão Rural
 
 ## 🎯 Objetivo do Projeto
 
-Sistema de gestão financeira e operacional para propriedades rurais, permitindo registro de dados diretamente pelo WhatsApp, com controle rigoroso de custos compartilhados entre diferentes áreas da propriedade.
+Sistema de CRM/ERP para gestão completa de uma propriedade rural familiar, cobrindo produção (gado leiteiro, suínos, extensível a novas fontes de renda), financeiro do negócio, financeiro familiar individual (por CPF de cada membro), obrigações de crédito e gestão fiscal — com conciliação bancária automática via Open Finance.
 
-## 🛠️ Tecnologias Utilizadas
+## 📲 Como os Dados São Capturados
 
-- **Backend:** Supabase (Postgres + Auth + Row Level Security)
-- **Frontend:** PWA
-- **Automação:** Bot de WhatsApp via Baileys, rodando em VPS
-- **IA:** Groq Whisper (transcrição) e Claude API (extração de dados)
-- **Integrações financeiras:** Pluggy, Asaas
-- **Faturamento:** NFE.io (NFP-e modelo 55)
+O ponto central do projeto é eliminar a fricção de digitar dados em um sistema: o produtor rural registra tudo pelo canal que já usa no dia a dia.
+
+- **Mensagens de texto no WhatsApp** (produção, gastos, ocorrências) são interpretadas pela API da Anthropic e convertidas em eventos estruturados
+- **Fotos de documentos** (cupom fiscal, recibo, boleto, nota fiscal) enviadas pelo WhatsApp ou pela câmera nativa do app são processadas via Claude Vision (multimodal, sem OCR separado), com revisão rápida obrigatória antes de confirmar o lançamento
+- O documento original fica anexado ao lançamento no Supabase Storage, servindo como comprovante fiscal/contábil
+
+## 🧭 Modelagem de Dados
+
+O sistema separa claramente o financeiro do negócio do financeiro pessoal de cada membro da família (por CPF), mantendo os dois relacionados à mesma propriedade. Entidades principais: Propriedade, Usuário (com perfil de acesso configurável), Pessoa física/Membro da família, Unidade de negócio (gado leiteiro, suínos, extensível), Evento operacional, Lançamento financeiro do negócio, Conta pessoal/familiar, Obrigação de crédito e Documento fiscal.
+
+Rateio de custos compartilhados entre unidades sempre em valores absolutos (R$), nunca em percentuais, evitando distorções quando os custos totais mudam.
+
+## 🛠️ Stack Técnica
+
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui
+- **Backend:** Supabase (Postgres, Auth, Row Level Security, Storage), com migrations em PL/pgSQL
+- **IA:** Anthropic Claude API (interpretação de texto e visão multimodal), Groq (transcrição de áudio)
+- **Automação:** Bot de WhatsApp, integrado ao pipeline de extração de dados
+- **Integrações financeiras:** Pluggy (Open Finance/conciliação bancária), Asaas
+- **Faturamento:** NFE.io (nota fiscal rural, NFP-e modelo 55)
+
+## 📁 Estrutura do Repositório
+
+- `web/` — aplicação Next.js (frontend e API routes)
+- `supabase/` — migrations e schema do banco de dados
+- `docs/` — documentação de arquitetura e especificações do projeto
+- Scripts Python (`extrair_eventos.py`, `transcrever_audios.py`) — protótipos do pipeline de extração de eventos e transcrição de áudio
 
 ## 📚 Aprendizados
 
-- Rateio de custos compartilhados armazenado sempre em valores absolutos (R$), nunca em percentuais, evitando distorções
-- Design centrado no canal do usuário: captura de dados via WhatsApp em vez de nova interface
-- Extrator de WhatsApp generalizado como componente reutilizável na caixa de ferramentas
-- Orquestração de múltiplas APIs externas (transcrição, IA, conciliação, faturamento) em um pipeline coeso
-
----
-
-## Extrator de conversas do WhatsApp
-
-Ferramenta de duas etapas para transformar a conversa do WhatsApp com o Ademir
-(texto + áudios) em eventos estruturados, usados para alimentar o
-planejamento do CRM de gestão rural.
-
-**Fase atual do projeto:** extração para complementar o planejamento — este
-script ainda roda manualmente, sob demanda. Não é a automação 24/7 prevista
-na arquitetura final (isso vem depois, quando o núcleo de dados existir).
-
-### Como funciona
-
-1. **`transcrever_audios.py`** — lê os arquivos de áudio (`.opus`) exportados
-   do WhatsApp e transcreve cada um usando o Groq (Whisper Large v3 Turbo).
-   Salva o resultado em `transcricoes.json`.
-2. **`extrair_eventos.py`** — lê o `.txt` da conversa exportada, insere as
-   transcrições no lugar das referências de áudio, e manda tudo para o Claude
-   extrair eventos estruturados (produção, financeiro, ocorrências). Salva o
-   resultado em `eventos_extraidos.json`.
-
-### Passo a passo
-
-#### 1. Exportar a conversa do WhatsApp
-
-No WhatsApp, abra a conversa com o Ademir → menu → **Exportar conversa** →
-escolha **"Incluir mídia"** (dessa vez precisa da mídia, para pegar os áudios).
-Isso gera um `.zip`. Extraia esse `.zip` numa pasta, por exemplo:
-
-```
-D:\PROJETOS\ADEMIR_FINANÇAS\whatsapp_export\
-```
-
-Essa pasta vai conter um arquivo `.txt` (o texto da conversa) e vários
-arquivos `.opus` (os áudios).
-
-#### 2. Instalar as dependências
-
-```bash
-pip install -r requirements.txt
-```
-
-#### 3. Conseguir as chaves de API (ambas têm nível gratuito)
-
-**Groq (transcrição):**
-1. Acesse [console.groq.com](https://console.groq.com)
-2. Crie uma conta gratuita (não pede cartão de crédito)
-3. Vá em "API Keys" e gere uma chave
-4. Nível gratuito: 2.000 transcrições/dia — muito acima do que essa conversa gera
-
-**Anthropic (extração dos eventos):**
-1. Acesse [console.anthropic.com](https://console.anthropic.com)
-2. Crie uma conta e gere uma chave de API
-3. Esse uso é pago por token, mas o volume aqui é baixíssimo (poucos centavos)
-
-#### 4. Configurar as chaves
-
-Copie `.env.example` para `.env` e preencha com suas chaves:
-
-```bash
-cp .env.example .env
-```
-
-```
-GROQ_API_KEY=gsk_sua_chave_aqui
-ANTHROPIC_API_KEY=sk-ant-sua_chave_aqui
-```
-
-#### 5. Rodar a transcrição dos áudios
-
-```bash
-python transcrever_audios.py --pasta "D:\PROJETOS\ADEMIR_FINANÇAS\whatsapp_export"
-```
-
-Isso vai gerar `transcricoes.json` dentro da mesma pasta. Se cair a conexão
-no meio, é só rodar de novo — ele continua de onde parou.
-
-#### 6. Rodar a extração de eventos
-
-```bash
-python extrair_eventos.py --pasta "D:\PROJETOS\ADEMIR_FINANÇAS\whatsapp_export"
-```
-
-Isso vai gerar `eventos_extraidos.json` — uma lista de eventos como:
-
-```json
-[
-  {
-    "data": "2026-07-01",
-    "tipo": "producao",
-    "unidade_negocio": "gado_leiteiro",
-    "valor": null,
-    "descricao": "Ordenha do dia produziu 180 litros",
-    "texto_original": "hoje deu 180 litros de leite"
-  },
-  {
-    "data": "2026-07-01",
-    "tipo": "insumo",
-    "unidade_negocio": "suinos",
-    "valor": 340.00,
-    "descricao": "Compra de ração para os suínos",
-    "texto_original": "gastei 340 na ração dos porco"
-  }
-]
-```
-
-### O que fazer com o resultado
-
-Esse `eventos_extraidos.json` é o material bruto que vai:
-- Confirmar (ou ajustar) o schema de entidades já desenhado no
-  `ADEMIR_CRM_ARQUITETURA.md` (seção 4)
-- Revelar terminologia real, frequência de eventos e tipos de valor que
-  aparecem na prática — informação que refina o desenho antes de construir
-  o banco de dados de verdade
-
-### Limitações conhecidas desta versão manual
-
-- Roda sob demanda, não captura mensagens em tempo real (isso é o Bot
-  WhatsApp 24/7 da arquitetura final — fase posterior)
-- Sem revisão humana automática dos eventos extraídos — nesta fase, é
-  esperado revisar o `eventos_extraidos.json` manualmente antes de usar
-  como base de decisão
-- Não lida ainda com fotos de documentos (cupons, boletos, notas) — isso
-  é o módulo de captura de foto via Claude Vision, também de fase posterior
+- Design centrado no canal do usuário: captura de dados via WhatsApp em vez de exigir uma interface nova
+- Sistema de perfis de acesso flexível: o próprio administrador operacional define o que cada usuário pode ver e lançar, sem depender do time de desenvolvimento
+- Orquestração de múltiplas APIs externas (transcrição, IA, conciliação bancária, faturamento fiscal) em um pipeline coeso
+- Modelagem cuidadosa para separar financeiro do negócio e financeiro pessoal sem perder o vínculo com a propriedade
