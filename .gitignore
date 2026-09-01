@@ -1,10 +1,24 @@
 .env
+.env.local
+.env.*.local
 ~$*.docx
 ~$*.xlsx
 node_modules/
 .worktrees/
 worktrees/
+auth_info_baileys/
+*.session
+.DS_Store
+dist/
+build/
 
 # Supabase local dev
 supabase/.branches/
 supabase/.temp/
+
+# Documentos e dados reais de clientes (não versionar)
+ACOMPANHAMENTO PROJETO.docx
+Ademir Thomas - 227.pdf
+Leitec.Thomas 2023.xlsx
+Leitec.Thomas 2023-2.xlsx
+files.zip
