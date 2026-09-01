@@ -1,4 +1,28 @@
-# Extrator de conversas do WhatsApp — ADEMIR_FINANÇAS
+# ADEMIR_FINANÇAS — CRM/ERP para Gestão de Propriedade Rural
+
+## 🎯 Objetivo do Projeto
+
+Sistema de gestão financeira e operacional para propriedades rurais, permitindo registro de dados diretamente pelo WhatsApp, com controle rigoroso de custos compartilhados entre diferentes áreas da propriedade.
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Backend:** Supabase (Postgres + Auth + Row Level Security)
+- **Frontend:** PWA
+- **Automação:** Bot de WhatsApp via Baileys, rodando em VPS
+- **IA:** Groq Whisper (transcrição) e Claude API (extração de dados)
+- **Integrações financeiras:** Pluggy, Asaas
+- **Faturamento:** NFE.io (NFP-e modelo 55)
+
+## 📚 Aprendizados
+
+- Rateio de custos compartilhados armazenado sempre em valores absolutos (R$), nunca em percentuais, evitando distorções
+- Design centrado no canal do usuário: captura de dados via WhatsApp em vez de nova interface
+- Extrator de WhatsApp generalizado como componente reutilizável na caixa de ferramentas
+- Orquestração de múltiplas APIs externas (transcrição, IA, conciliação, faturamento) em um pipeline coeso
+
+---
+
+## Extrator de conversas do WhatsApp
 
 Ferramenta de duas etapas para transformar a conversa do WhatsApp com o Ademir
 (texto + áudios) em eventos estruturados, usados para alimentar o
@@ -8,9 +32,7 @@ planejamento do CRM de gestão rural.
 script ainda roda manualmente, sob demanda. Não é a automação 24/7 prevista
 na arquitetura final (isso vem depois, quando o núcleo de dados existir).
 
----
-
-## Como funciona
+### Como funciona
 
 1. **`transcrever_audios.py`** — lê os arquivos de áudio (`.opus`) exportados
    do WhatsApp e transcreve cada um usando o Groq (Whisper Large v3 Turbo).
@@ -20,11 +42,9 @@ na arquitetura final (isso vem depois, quando o núcleo de dados existir).
    extrair eventos estruturados (produção, financeiro, ocorrências). Salva o
    resultado em `eventos_extraidos.json`.
 
----
+### Passo a passo
 
-## Passo a passo
-
-### 1. Exportar a conversa do WhatsApp
+#### 1. Exportar a conversa do WhatsApp
 
 No WhatsApp, abra a conversa com o Ademir → menu → **Exportar conversa** →
 escolha **"Incluir mídia"** (dessa vez precisa da mídia, para pegar os áudios).
@@ -37,13 +57,13 @@ D:\PROJETOS\ADEMIR_FINANÇAS\whatsapp_export\
 Essa pasta vai conter um arquivo `.txt` (o texto da conversa) e vários
 arquivos `.opus` (os áudios).
 
-### 2. Instalar as dependências
+#### 2. Instalar as dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Conseguir as chaves de API (ambas têm nível gratuito)
+#### 3. Conseguir as chaves de API (ambas têm nível gratuito)
 
 **Groq (transcrição):**
 1. Acesse [console.groq.com](https://console.groq.com)
@@ -56,7 +76,7 @@ pip install -r requirements.txt
 2. Crie uma conta e gere uma chave de API
 3. Esse uso é pago por token, mas o volume aqui é baixíssimo (poucos centavos)
 
-### 4. Configurar as chaves
+#### 4. Configurar as chaves
 
 Copie `.env.example` para `.env` e preencha com suas chaves:
 
@@ -69,7 +89,7 @@ GROQ_API_KEY=gsk_sua_chave_aqui
 ANTHROPIC_API_KEY=sk-ant-sua_chave_aqui
 ```
 
-### 5. Rodar a transcrição dos áudios
+#### 5. Rodar a transcrição dos áudios
 
 ```bash
 python transcrever_audios.py --pasta "D:\PROJETOS\ADEMIR_FINANÇAS\whatsapp_export"
@@ -78,7 +98,7 @@ python transcrever_audios.py --pasta "D:\PROJETOS\ADEMIR_FINANÇAS\whatsapp_expo
 Isso vai gerar `transcricoes.json` dentro da mesma pasta. Se cair a conexão
 no meio, é só rodar de novo — ele continua de onde parou.
 
-### 6. Rodar a extração de eventos
+#### 6. Rodar a extração de eventos
 
 ```bash
 python extrair_eventos.py --pasta "D:\PROJETOS\ADEMIR_FINANÇAS\whatsapp_export"
@@ -107,9 +127,7 @@ Isso vai gerar `eventos_extraidos.json` — uma lista de eventos como:
 ]
 ```
 
----
-
-## O que fazer com o resultado
+### O que fazer com o resultado
 
 Esse `eventos_extraidos.json` é o material bruto que vai:
 - Confirmar (ou ajustar) o schema de entidades já desenhado no
@@ -118,9 +136,7 @@ Esse `eventos_extraidos.json` é o material bruto que vai:
   aparecem na prática — informação que refina o desenho antes de construir
   o banco de dados de verdade
 
----
-
-## Limitações conhecidas desta versão manual
+### Limitações conhecidas desta versão manual
 
 - Roda sob demanda, não captura mensagens em tempo real (isso é o Bot
   WhatsApp 24/7 da arquitetura final — fase posterior)
